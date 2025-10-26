@@ -28,16 +28,15 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
   const [form, setForm] = useState<FlightData>({
     airline_code: "",
     flight_number: "",
-    service_class: "Economy", // ✅ Default valid value
-    origin: "", 
-    destination: "", 
+    service_class: "Economy",
+    origin: "CDG",
+    destination: "MEX",
     flight_date: new Date().toISOString().split("T")[0],
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔹 Fetch airline code automatically from backend
   useEffect(() => {
     async function fetchAirlineCode() {
       if (!selectedAirline) return;
@@ -48,10 +47,10 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
         if (res && res.airline_code) {
           setForm((prev) => ({ ...prev, airline_code: res.airline_code }));
         } else {
-          setError("Airline not found in database");
+          setError("Airline not found");
         }
       } catch (err) {
-        console.error("Error fetching airline:", err);
+        console.error(err);
         setError("Error fetching airline code");
       } finally {
         setLoading(false);
@@ -64,20 +63,16 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  // ✈️ Options for dropdowns — all valid for DB
-  const serviceClassOptions: string[] = ["Economy", "Business", "First"];
-  const airportOptions: string[] = [
-    "DXB", "LHR", "ZRH", "JFK", "CDG", "FRA", "SIN", "MAD", "MEX",
-  ];
+  const serviceClasses = ["Economy", "Business", "First"];
+  const airports = ["CDG", "LHR", "FRA", "ZRH", "DXB", "SIN", "MEX", "JFK", "MAD"];
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>✈️ Flight Information</Text>
+      <Text style={styles.title}>✈️ Flight Details</Text>
 
       {loading && <ActivityIndicator color="#0078d4" style={{ marginBottom: 10 }} />}
       {error && <Text style={styles.error}>{error}</Text>}
 
-      {/* Airline Code (auto-filled, not editable) */}
       <TextInput
         placeholder="AIRLINE CODE"
         value={form.airline_code}
@@ -85,62 +80,56 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
         style={[styles.input, { backgroundColor: "#f3f2f1" }]}
       />
 
-      {/* Flight Number */}
       <TextInput
         placeholder="FLIGHT NUMBER"
         value={form.flight_number}
-        onChangeText={(v: string) => handleChange("flight_number", v)}
+        onChangeText={(v) => handleChange("flight_number", v)}
         style={styles.input}
       />
 
-      {/* Service Class Picker */}
       <Text style={styles.label}>Service Class</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={form.service_class}
-          onValueChange={(v: string) => handleChange("service_class", v)} 
+          onValueChange={(v) => handleChange("service_class", v)}
         >
-          {serviceClassOptions.map((opt) => (
+          {serviceClasses.map((opt) => (
             <Picker.Item key={opt} label={opt} value={opt} />
           ))}
         </Picker>
       </View>
 
-      {/* Origin Picker */}
       <Text style={styles.label}>Origin</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={form.origin}
-          onValueChange={(v: string) => handleChange("origin", v)} 
+          onValueChange={(v) => handleChange("origin", v)}
         >
-          {airportOptions.map((opt) => (
+          {airports.map((opt) => (
             <Picker.Item key={opt} label={opt} value={opt} />
           ))}
         </Picker>
       </View>
 
-      {/* Destination Picker */}
       <Text style={styles.label}>Destination</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={form.destination}
-          onValueChange={(v: string) => handleChange("destination", v)} 
+          onValueChange={(v) => handleChange("destination", v)}
         >
-          {airportOptions.map((opt) => (
+          {airports.map((opt) => (
             <Picker.Item key={opt} label={opt} value={opt} />
           ))}
         </Picker>
       </View>
 
-      {/* Flight Date */}
       <TextInput
         placeholder="FLIGHT DATE (YYYY-MM-DD)"
         value={form.flight_date}
-        onChangeText={(v: string) => handleChange("flight_date", v)}
+        onChangeText={(v) => handleChange("flight_date", v)}
         style={styles.input}
       />
 
-      {/* Continue Button */}
       <TouchableOpacity
         style={[styles.btn, !form.flight_number && styles.disabledBtn]}
         disabled={!form.flight_number}
