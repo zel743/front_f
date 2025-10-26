@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { registerBarcode } from "../../utils/api";
+import { TabTitle } from "../TabTitle";
 import BarcodeScanner from "../ui/barcode-scanner";
 import BottleForm from "../ui/bottle-form";
 import FlightForm from "../ui/flight-form";
@@ -131,7 +132,7 @@ export default function InspectionFlow({
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView>
       {/* Step 1: Flight Form */}
       {step === "flight" && (
         <FlightForm
@@ -150,8 +151,8 @@ export default function InspectionFlow({
 
       {/* Step 3: Product Preview */}
       {step === "preview" && bottleData && (
-        <View style={styles.section}>
-          <Text style={styles.title}>Product Preview</Text>
+        <div style={styles.container}>
+          <TabTitle title={`${selectedAirline}`} subtitle="Bottle preview" />
           <View style={styles.previewBox}>
             <Text style={styles.previewText}>
               Barcode: {bottleData.barcode}
@@ -168,14 +169,19 @@ export default function InspectionFlow({
             </Text>
           </View>
 
-          <TouchableOpacity style={styles.btn} onPress={handlePreviewContinue}>
+          <TouchableOpacity onPress={handlePreviewContinue}>
             <Text style={styles.btnText}>Continue</Text>
           </TouchableOpacity>
-        </View>
+        </div>
       )}
 
       {/* Step 4: Qualitative Data */}
-      {step === "qualitative" && <BottleForm onSubmit={handleBottleSubmit} />}
+      {step === "qualitative" && (
+        <BottleForm
+          onSubmit={handleBottleSubmit}
+          selectedAirline={selectedAirline}
+        />
+      )}
 
       {/* Step 5: Final Report */}
       {step === "done" && (
@@ -258,7 +264,6 @@ export default function InspectionFlow({
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, alignItems: "center", paddingVertical: 30 },
   airlineHeader: {
     fontSize: 18,
     fontWeight: "600",
@@ -270,12 +275,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: "600", marginBottom: 10 },
   previewBox: {
     width: "100%",
-    backgroundColor: "#f3f2f1",
-    borderRadius: 6,
+    backgroundColor: "#fff",
+    borderRadius: 10,
     padding: 10,
     marginBottom: 16,
-    borderColor: "#edebe9",
-    borderWidth: 1,
   },
   previewText: { fontSize: 15, marginBottom: 4, color: "#201f1e" },
   resultContainer: { width: "90%", alignItems: "center", marginTop: 20 },
@@ -345,4 +348,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnText: { color: "#fff", fontWeight: "600" },
+
+  layout: {
+    paddingLeft: 20,
+    paddingRight: 20,
+    width: "100%",
+  },
+  container: {
+    marginTop: "40%",
+    display: "flex",
+    flexDirection: "column",
+    gap: 20,
+  },
 });

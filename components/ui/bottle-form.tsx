@@ -1,6 +1,7 @@
 import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { TabTitle } from "../TabTitle";
 
 interface BottleQualitative {
   condition: string;
@@ -11,9 +12,13 @@ interface BottleQualitative {
 
 interface BottleFormProps {
   onSubmit: (data: BottleQualitative) => void;
+  selectedAirline: string;
 }
 
-export default function BottleForm({ onSubmit }: BottleFormProps) {
+export default function BottleForm({
+  onSubmit,
+  selectedAirline,
+}: BottleFormProps) {
   const [form, setForm] = useState<BottleQualitative>({
     condition: "good",
     seal_status: "sealed",
@@ -47,7 +52,7 @@ export default function BottleForm({ onSubmit }: BottleFormProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🍾 Bottle Inspection</Text>
+      <TabTitle title={`${selectedAirline}`} subtitle="Bottle inspection" />
 
       <Text style={styles.label}>Condition</Text>
       <View style={styles.pickerContainer}>
@@ -106,7 +111,12 @@ export default function BottleForm({ onSubmit }: BottleFormProps) {
 
 const styles = StyleSheet.create({
   container: { width: "90%", marginTop: 20 },
-  title: { fontSize: 18, fontWeight: "600", marginBottom: 10, color: "#201f1e" },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 10,
+    color: "#201f1e",
+  },
   label: { fontWeight: "500", marginBottom: 4, color: "#201f1e" },
   pickerContainer: {
     borderColor: "#ccc",
