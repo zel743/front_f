@@ -51,14 +51,15 @@ export default function BottleForm({
   }));
 
   return (
-    <View style={styles.container}>
+    <View>
       <TabTitle title={`${selectedAirline}`} subtitle="Bottle inspection" />
 
       <Text style={styles.label}>Condition</Text>
-      <View style={styles.pickerContainer}>
+      <View>
         <Picker
           selectedValue={form.condition}
           onValueChange={(v) => handleChange("condition", v)}
+          style={styles.picker}
         >
           {conditionOptions.map((opt) => (
             <Picker.Item key={opt} label={opt.toUpperCase()} value={opt} />
@@ -67,10 +68,11 @@ export default function BottleForm({
       </View>
 
       <Text style={styles.label}>Seal Status</Text>
-      <View style={styles.pickerContainer}>
+      <View>
         <Picker
           selectedValue={form.seal_status}
           onValueChange={(v) => handleChange("seal_status", v)}
+          style={styles.picker}
         >
           {sealOptions.map((opt) => (
             <Picker.Item key={opt} label={opt.toUpperCase()} value={opt} />
@@ -79,10 +81,11 @@ export default function BottleForm({
       </View>
 
       <Text style={styles.label}>Fill Level</Text>
-      <View style={styles.pickerContainer}>
+      <View>
         <Picker
           selectedValue={form.fill_level}
           onValueChange={(v) => handleChange("fill_level", v)}
+          style={styles.picker}
         >
           {fillOptions.map((opt) => (
             <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
@@ -91,10 +94,11 @@ export default function BottleForm({
       </View>
 
       <Text style={styles.label}>Cleanliness</Text>
-      <View style={styles.pickerContainer}>
+      <View>
         <Picker
           selectedValue={form.cleanliness}
           onValueChange={(v) => handleChange("cleanliness", v)}
+          style={styles.picker}
         >
           {cleanlinessOptions.map((opt) => (
             <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
@@ -127,4 +131,15 @@ const styles = StyleSheet.create({
   },
   btn: { backgroundColor: "#107c10", padding: 12, borderRadius: 4 },
   btnText: { color: "#fff", textAlign: "center", fontWeight: "600" },
+  picker: {
+    borderColor: "#6E7577",
+    color: "#6E7577",
+    fontSize: 16,
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    textAlign: "center",
+    width: "100%",
+    backgroundColor: "transparent",
+  },
 });
