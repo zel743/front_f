@@ -1,27 +1,102 @@
+import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface BottleQualitative {
   condition: string;
-  seal: string;
+  seal_status: string;
   fill_level: string;
+  cleanliness: string;
 }
 
-export default function BottleForm({ onSubmit }: { onSubmit: (data: BottleQualitative) => void }) {
-  const [form, setForm] = useState<BottleQualitative>({ condition: "", seal: "", fill_level: "" });
+interface BottleFormProps {
+  onSubmit: (data: BottleQualitative) => void;
+}
+
+export default function BottleForm({ onSubmit }: BottleFormProps) {
+  const [form, setForm] = useState<BottleQualitative>({
+    condition: "good",
+    seal_status: "sealed",
+    fill_level: "100",
+    cleanliness: "10", // 1–10 scale
+  });
+
+  const handleChange = (key: keyof BottleQualitative, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const conditionOptions = ["excellent", "good", "fair", "damaged"];
+  const sealOptions = ["sealed", "resealed", "opened", "broken"];
+  const fillOptions = [
+    { label: "100% (Full)", value: "100" },
+    { label: "90%", value: "90" },
+    { label: "80%", value: "80" },
+    { label: "70%", value: "70" },
+    { label: "60%", value: "60" },
+    { label: "50%", value: "50" },
+    { label: "40%", value: "40" },
+    { label: "30%", value: "30" },
+    { label: "20%", value: "20" },
+    { label: "10%", value: "10" },
+    { label: "0% (Empty)", value: "0" },
+  ];
+  const cleanlinessOptions = Array.from({ length: 10 }, (_, i) => ({
+    label: `${i + 1} / 10`,
+    value: String(i + 1),
+  }));
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bottle Details</Text>
-      {["condition", "seal", "fill_level"].map((key) => (
-        <TextInput
-          key={key}
-          placeholder={key.replace("_", " ").toUpperCase()}
-          value={(form as any)[key]}
-          onChangeText={(v) => setForm({ ...form, [key]: v })}
-          style={styles.input}
-        />
-      ))}
+      <Text style={styles.title}>🍾 Bottle Inspection</Text>
+
+      <Text style={styles.label}>Condition</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.condition}
+          onValueChange={(v) => handleChange("condition", v)}
+        >
+          {conditionOptions.map((opt) => (
+            <Picker.Item key={opt} label={opt.toUpperCase()} value={opt} />
+          ))}
+        </Picker>
+      </View>
+
+      <Text style={styles.label}>Seal Status</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.seal_status}
+          onValueChange={(v) => handleChange("seal_status", v)}
+        >
+          {sealOptions.map((opt) => (
+            <Picker.Item key={opt} label={opt.toUpperCase()} value={opt} />
+          ))}
+        </Picker>
+      </View>
+
+      <Text style={styles.label}>Fill Level</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.fill_level}
+          onValueChange={(v) => handleChange("fill_level", v)}
+        >
+          {fillOptions.map((opt) => (
+            <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+          ))}
+        </Picker>
+      </View>
+
+      <Text style={styles.label}>Cleanliness</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.cleanliness}
+          onValueChange={(v) => handleChange("cleanliness", v)}
+        >
+          {cleanlinessOptions.map((opt) => (
+            <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+          ))}
+        </Picker>
+      </View>
+
       <TouchableOpacity style={styles.btn} onPress={() => onSubmit(form)}>
         <Text style={styles.btnText}>Submit Bottle</Text>
       </TouchableOpacity>
@@ -32,11 +107,11 @@ export default function BottleForm({ onSubmit }: { onSubmit: (data: BottleQualit
 const styles = StyleSheet.create({
   container: { width: "90%", marginTop: 20 },
   title: { fontSize: 18, fontWeight: "600", marginBottom: 10, color: "#201f1e" },
-  input: {
+  label: { fontWeight: "500", marginBottom: 4, color: "#201f1e" },
+  pickerContainer: {
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 6,
-    padding: 10,
     marginBottom: 8,
     backgroundColor: "#fff",
   },
