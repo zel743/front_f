@@ -186,7 +186,7 @@ export default function InspectionFlow({
       {/* Step 5: Final Report */}
       {step === "done" && (
         <View style={styles.resultContainer}>
-          <Text style={styles.title}>📊 Inspection Report</Text>
+          <TabTitle title={`${selectedAirline}`} subtitle="Inspection Report" />
 
           {loading ? (
             <ActivityIndicator size="large" color="#0078d4" />
@@ -247,14 +247,11 @@ export default function InspectionFlow({
             <Text style={styles.resultText}>No result data.</Text>
           )}
 
-          <TouchableOpacity style={styles.btn} onPress={restart}>
+          <TouchableOpacity onPress={restart}>
             <Text style={styles.btnText}>Scan Another Bottle</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.btn, { backgroundColor: "#a4262c" }]}
-            onPress={onReturnHome}
-          >
+          <TouchableOpacity onPress={onReturnHome}>
             <Text style={styles.btnText}>Finish & Return Home</Text>
           </TouchableOpacity>
         </View>
