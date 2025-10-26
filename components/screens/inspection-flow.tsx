@@ -14,7 +14,7 @@ import BottleForm from "../ui/bottle-form";
 import FlightForm from "../ui/flight-form";
 
 interface InspectionFlowProps {
-  selectedAirline: string; // Airline name (from App)
+  selectedAirline: string;
   onReturnHome: () => void;
 }
 
@@ -22,7 +22,9 @@ export default function InspectionFlow({
   selectedAirline,
   onReturnHome,
 }: InspectionFlowProps) {
-  const [step, setStep] = useState<"flight" | "scan" | "preview" | "qualitative" | "done">("flight");
+  const [step, setStep] = useState<
+    "flight" | "scan" | "preview" | "qualitative" | "done"
+  >("flight");
   const [loading, setLoading] = useState(false);
   const [flightInfo, setFlightInfo] = useState<any>(null);
   const [bottleData, setBottleData] = useState<any>(null);
@@ -45,7 +47,7 @@ export default function InspectionFlow({
 
     if (barcodeInfo.found) {
       Alert.alert(
-        "Product Found ✅",
+        "Product Found",
         `${barcodeInfo.product_name} (${barcodeInfo.brand})\nCategory: ${barcodeInfo.category}\nSize: ${barcodeInfo.bottle_size}`
       );
       setStep("preview");
@@ -112,14 +114,35 @@ export default function InspectionFlow({
     setResult(null);
   };
 
+  // 🎨 Color helper for recommendation
+  const getRecommendationColor = (action?: string) => {
+    switch ((action || "").toLowerCase()) {
+      case "keep":
+        return "#107C10"; // green
+      case "refill":
+        return "#0078D4"; // blue
+      case "replace":
+        return "#FFB900"; // yellow
+      case "discard":
+        return "#A4262C"; // red
+      default:
+        return "#605E5C"; // neutral gray
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.airlineHeader}>Airline: {selectedAirline}</Text>
 
+      {/* Step 1: Flight Form */}
       {step === "flight" && (
-        <FlightForm onSubmit={handleFlightSubmit} selectedAirline={selectedAirline} />
+        <FlightForm
+          onSubmit={handleFlightSubmit}
+          selectedAirline={selectedAirline}
+        />
       )}
 
+      {/* Step 2: Scan Bottle */}
       {step === "scan" && (
         <View style={styles.section}>
           <Text style={styles.header}>Scan Bottle</Text>
@@ -127,6 +150,7 @@ export default function InspectionFlow({
         </View>
       )}
 
+      {/* Step 3: Product Preview */}
       {step === "preview" && bottleData && (
         <View style={styles.section}>
           <Text style={styles.title}>Product Preview</Text>
@@ -144,17 +168,71 @@ export default function InspectionFlow({
         </View>
       )}
 
+      {/* Step 4: Qualitative Data */}
       {step === "qualitative" && <BottleForm onSubmit={handleBottleSubmit} />}
 
+      {/* Step 5: Final Report */}
       {step === "done" && (
         <View style={styles.resultContainer}>
-          <Text style={styles.title}>✅ Report Generated</Text>
+          <Text style={styles.title}>📊 Inspection Report</Text>
+
           {loading ? (
             <ActivityIndicator size="large" color="#0078d4" />
+          ) : result ? (
+            <>
+              {/* Product Info */}
+              <View style={styles.infoCard}>
+                <Text style={styles.infoTitle}>Product:</Text>
+                <Text style={styles.infoText}>
+                  {result.product?.name} ({result.product?.brand})
+                </Text>
+
+                <Text style={styles.infoTitle}>Category:</Text>
+                <Text style={styles.infoText}>{result.product?.category}</Text>
+
+                <Text style={styles.infoTitle}>Flight:</Text>
+                <Text style={styles.infoText}>
+                  {result.flight?.number} • {result.flight?.service_class}
+                </Text>
+
+                <Text style={styles.infoTitle}>Date:</Text>
+                <Text style={styles.infoText}>{result.flight?.date}</Text>
+              </View>
+
+              {/* Recommendation */}
+              <View style={styles.recommendationContainer}>
+                <Text style={styles.recommendationLabel}>
+                  Recommended Action:
+                </Text>
+                <View style={styles.recommendationRow}>
+                  <View
+                    style={[
+                      styles.circle,
+                      {
+                        backgroundColor: getRecommendationColor(
+                          result.recommended_action
+                        ),
+                      },
+                    ]}
+                  />
+                  <Text style={styles.recommendationText}>
+                    {result.recommended_action || "No recommendation"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Policy Info */}
+              {result.policy_used && (
+                <View style={styles.policyBox}>
+                  <Text style={styles.policyTitle}>
+                    🧭 Policy Applied: {result.policy_used}
+                  </Text>
+                  <Text style={styles.policyNotes}>{result.notes}</Text>
+                </View>
+              )}
+            </>
           ) : (
-            <Text style={styles.resultText}>
-              {result ? JSON.stringify(result, null, 2) : "No result data."}
-            </Text>
+            <Text style={styles.resultText}>No result data.</Text>
           )}
 
           <TouchableOpacity style={styles.btn} onPress={restart}>
@@ -193,11 +271,7 @@ const styles = StyleSheet.create({
     borderColor: "#edebe9",
     borderWidth: 1,
   },
-  previewText: {
-    fontSize: 15,
-    marginBottom: 4,
-    color: "#201f1e",
-  },
+  previewText: { fontSize: 15, marginBottom: 4, color: "#201f1e" },
   resultContainer: { width: "90%", alignItems: "center", marginTop: 20 },
   resultText: {
     backgroundColor: "#f3f2f1",
@@ -207,6 +281,55 @@ const styles = StyleSheet.create({
     color: "#201f1e",
     width: "100%",
   },
+  infoCard: {
+    backgroundColor: "#f3f2f1",
+    borderRadius: 6,
+    padding: 10,
+    width: "100%",
+    marginBottom: 16,
+  },
+  infoTitle: { fontWeight: "600", color: "#201f1e" },
+  infoText: { marginBottom: 4, color: "#323130" },
+  recommendationContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  recommendationLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#201f1e",
+    marginBottom: 8,
+  },
+  recommendationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  recommendationText: {
+    fontSize: 18,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  circle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderColor: "#fff",
+    borderWidth: 2,
+  },
+  policyBox: {
+    backgroundColor: "#e5f1fb",
+    borderRadius: 6,
+    padding: 10,
+    width: "100%",
+    marginBottom: 10,
+  },
+  policyTitle: {
+    fontWeight: "600",
+    color: "#004578",
+    marginBottom: 4,
+  },
+  policyNotes: { color: "#201f1e", fontSize: 14 },
   btn: {
     backgroundColor: "#0078d4",
     padding: 12,

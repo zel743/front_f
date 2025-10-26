@@ -1,5 +1,13 @@
+import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { getAirlineByName } from "../../utils/api";
 
 interface FlightData {
@@ -13,16 +21,16 @@ interface FlightData {
 
 interface FlightFormProps {
   onSubmit: (data: FlightData) => void;
-  selectedAirline?: string; // 👈 we’ll pass this from InspectionFlow
+  selectedAirline?: string;
 }
 
 export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProps) {
   const [form, setForm] = useState<FlightData>({
     airline_code: "",
     flight_number: "",
-    service_class: "",
-    origin: "",
-    destination: "",
+    service_class: "Economy", // ✅ Default valid value
+    origin: "", 
+    destination: "", 
     flight_date: new Date().toISOString().split("T")[0],
   });
 
@@ -56,6 +64,12 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  // ✈️ Options for dropdowns — all valid for DB
+  const serviceClassOptions: string[] = ["Economy", "Business", "First"];
+  const airportOptions: string[] = [
+    "DXB", "LHR", "ZRH", "JFK", "CDG", "FRA", "SIN", "MAD", "MEX",
+  ];
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>✈️ Flight Information</Text>
@@ -71,42 +85,62 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
         style={[styles.input, { backgroundColor: "#f3f2f1" }]}
       />
 
-      {/* Remaining fields (editable) */}
+      {/* Flight Number */}
       <TextInput
         placeholder="FLIGHT NUMBER"
         value={form.flight_number}
-        onChangeText={(v) => handleChange("flight_number", v)}
+        onChangeText={(v: string) => handleChange("flight_number", v)}
         style={styles.input}
       />
 
-      <TextInput
-        placeholder="SERVICE CLASS (e.g., Economy)"
-        value={form.service_class}
-        onChangeText={(v) => handleChange("service_class", v)}
-        style={styles.input}
-      />
+      {/* Service Class Picker */}
+      <Text style={styles.label}>Service Class</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.service_class}
+          onValueChange={(v: string) => handleChange("service_class", v)} 
+        >
+          {serviceClassOptions.map((opt) => (
+            <Picker.Item key={opt} label={opt} value={opt} />
+          ))}
+        </Picker>
+      </View>
 
-      <TextInput
-        placeholder="ORIGIN"
-        value={form.origin}
-        onChangeText={(v) => handleChange("origin", v)}
-        style={styles.input}
-      />
+      {/* Origin Picker */}
+      <Text style={styles.label}>Origin</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.origin}
+          onValueChange={(v: string) => handleChange("origin", v)} 
+        >
+          {airportOptions.map((opt) => (
+            <Picker.Item key={opt} label={opt} value={opt} />
+          ))}
+        </Picker>
+      </View>
 
-      <TextInput
-        placeholder="DESTINATION"
-        value={form.destination}
-        onChangeText={(v) => handleChange("destination", v)}
-        style={styles.input}
-      />
+      {/* Destination Picker */}
+      <Text style={styles.label}>Destination</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.destination}
+          onValueChange={(v: string) => handleChange("destination", v)} 
+        >
+          {airportOptions.map((opt) => (
+            <Picker.Item key={opt} label={opt} value={opt} />
+          ))}
+        </Picker>
+      </View>
 
+      {/* Flight Date */}
       <TextInput
         placeholder="FLIGHT DATE (YYYY-MM-DD)"
         value={form.flight_date}
-        onChangeText={(v) => handleChange("flight_date", v)}
+        onChangeText={(v: string) => handleChange("flight_date", v)}
         style={styles.input}
       />
 
+      {/* Continue Button */}
       <TouchableOpacity
         style={[styles.btn, !form.flight_number && styles.disabledBtn]}
         disabled={!form.flight_number}
@@ -121,11 +155,19 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
 const styles = StyleSheet.create({
   container: { width: "90%", marginTop: 20 },
   title: { fontSize: 18, fontWeight: "600", marginBottom: 10, color: "#201f1e" },
+  label: { fontWeight: "500", marginBottom: 4, color: "#201f1e" },
   input: {
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 6,
     padding: 10,
+    marginBottom: 8,
+    backgroundColor: "#fff",
+  },
+  pickerContainer: {
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 6,
     marginBottom: 8,
     backgroundColor: "#fff",
   },
