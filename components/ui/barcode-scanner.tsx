@@ -2,19 +2,17 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImageManipulator from "expo-image-manipulator";
 import React, { useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { scanBarcodeImage } from "../../utils/api";
 
-const API_URL = "http://localhost:6060/scan-barcode-image";
-
-const BarcodeScanner: React.FC = () => {
+export default function BarcodeScanner({ onDetected }: { onDetected: (data: any) => void }) {
   const cameraRef = useRef<CameraView | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
-  const [cameraActive, setCameraActive] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [result, setResult] = useState<string>("Ready to scan");
-  const [resultColor, setResultColor] = useState<string>("#201f1e");
+  const [cameraActive, setCameraActive] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState("Ready to scan");
+  const [resultColor, setResultColor] = useState("#201f1e");
 
-  // 🎥 Toggle camera
-  const handleCamera = async () => {
+  const handleCameraToggle = async () => {
     if (cameraActive) {
       setCameraActive(false);
       setResult("Camera stopped");
@@ -36,41 +34,30 @@ const BarcodeScanner: React.FC = () => {
     setResultColor("#201f1e");
   };
 
-  // 📸 Capture frame and send
-  const scanBarcode = async () => {
-    if (!cameraRef.current) {
-      setResult("Camera not active");
-      setResultColor("#a4262c");
-      return;
-    }
+  const handleScan = async () => {
+    if (!cameraRef.current) return;
+
+    setLoading(true);
+    setResult("Scanning...");
+    setResultColor("#0078d4");
 
     try {
-      setLoading(true);
-      setResult("Scanning...");
-      setResultColor("#0078d4");
-
       const photo = await cameraRef.current.takePictureAsync({
         base64: true,
         quality: 0.7,
       });
 
-      const manipulated = await ImageManipulator.manipulateAsync(
-        photo.uri,
-        [],
-        { base64: true, compress: 0.7 }
-      );
-
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: `data:image/jpeg;base64,${manipulated.base64}` }),
+      const manipulated = await ImageManipulator.manipulateAsync(photo.uri, [], {
+        base64: true,
+        compress: 0.7,
       });
 
-      const data = await response.json();
+      const data = await scanBarcodeImage(`data:image/jpeg;base64,${manipulated.base64}`);
 
       if (data.success && data.found) {
         setResult(`${data.product_name} (${data.brand})`);
         setResultColor("#107c10");
+        onDetected(data);
       } else if (data.success && !data.found) {
         setResult(data.message || "Product not found");
         setResultColor("#a4262c");
@@ -95,36 +82,21 @@ const BarcodeScanner: React.FC = () => {
     );
   }
 
-  if (!permission.granted && !cameraActive) {
-    return (
-      <View style={styles.center}>
-        <Text>No access to camera</Text>
-        <TouchableOpacity style={[styles.btn, styles.primary]} onPress={requestPermission}>
-          <Text style={styles.btnText}>Grant Permission</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.appRoot}>
       <View style={styles.card}>
-        <Text style={styles.title}>Barcode Image Scanner</Text>
+        <Text style={styles.title}>Barcode Scanner</Text>
 
         {cameraActive && (
           <View style={styles.videoContainer}>
-            <CameraView
-              ref={cameraRef}
-              style={styles.camera}
-              facing="back"
-            />
+            <CameraView ref={cameraRef} style={styles.camera} facing="back" />
           </View>
         )}
 
         <View style={styles.controls}>
           <TouchableOpacity
             style={[styles.btn, cameraActive ? styles.stop : styles.primary]}
-            onPress={handleCamera}
+            onPress={handleCameraToggle}
           >
             <Text style={styles.btnText}>
               {cameraActive ? "Stop Camera" : "Start Camera"}
@@ -135,7 +107,7 @@ const BarcodeScanner: React.FC = () => {
             <TouchableOpacity
               style={[styles.btn, styles.secondary]}
               disabled={loading}
-              onPress={scanBarcode}
+              onPress={handleScan}
             >
               <Text style={styles.btnText}>
                 {loading ? "Scanning..." : "Scan Barcode"}
@@ -150,15 +122,10 @@ const BarcodeScanner: React.FC = () => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  appRoot: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f3f2f1",
-  },
+  appRoot: { alignItems: "center", justifyContent: "center" },
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 6,
@@ -167,17 +134,8 @@ const styles = StyleSheet.create({
     padding: 24,
     width: 360,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#201f1e",
-    marginBottom: 16,
-  },
+  title: { fontSize: 20, fontWeight: "600", color: "#201f1e", marginBottom: 16 },
   videoContainer: {
     width: "100%",
     height: 240,
@@ -188,39 +146,13 @@ const styles = StyleSheet.create({
     borderColor: "#edebe9",
     marginBottom: 16,
   },
-  camera: {
-    flex: 1,
-  },
-  controls: {
-    width: "100%",
-    gap: 10,
-    marginTop: 8,
-  },
-  btn: {
-    borderRadius: 4,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  btnText: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#ffffff",
-  },
+  camera: { flex: 1 },
+  controls: { width: "100%", gap: 10, marginTop: 8 },
+  btn: { borderRadius: 4, paddingVertical: 12, alignItems: "center" },
+  btnText: { fontSize: 15, fontWeight: "500", color: "#ffffff" },
   primary: { backgroundColor: "#0078d4" },
   secondary: { backgroundColor: "#107c10" },
   stop: { backgroundColor: "#a4262c" },
-  result: {
-    marginTop: 16,
-    fontSize: 15,
-    fontWeight: "500",
-    textAlign: "center",
-    minHeight: 24,
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  result: { marginTop: 16, fontSize: 15, fontWeight: "500", textAlign: "center", minHeight: 24 },
+  center: { justifyContent: "center", alignItems: "center", flex: 1 },
 });
-
-export default BarcodeScanner;
