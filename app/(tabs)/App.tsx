@@ -28,21 +28,62 @@ function ChatScreen({ onBack }: { onBack: () => void }) {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css"/>
-        <script defer src="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/index.umd.js"></script>
         <style>
-          html, body, #chat-root { height: 100%; margin: 0; background:#0b0b0b; }
+          html, body, #n8n-chat { 
+            height: 100%; 
+            margin: 0; 
+            background: #0b0b0b; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          }
+          #n8n-chat {
+            display: flex;
+            flex-direction: column;
+          }
         </style>
       </head>
       <body>
-        <div id="chat-root"></div>
-        <script>
-          document.addEventListener('DOMContentLoaded', () => {
-            const chat = new window.N8nChat({
-              webhookUrl: "${N8N_WEBHOOK}",
-              title: "Asistente n8n",
-              theme: { primary: "#0078d4" }
-            });
-            chat.mount("#chat-root");
+        <div id="n8n-chat"></div>
+        
+        <script type="module">
+          import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+          createChat({
+            webhookUrl: 'http://localhost:5678/webhook/03ef33b6-731d-4583-822b-d9f9d92a1c12/chat',
+            webhookConfig: {
+              method: 'POST',
+              headers: {}
+            },
+            target: '#n8n-chat',
+            mode: 'window',
+            chatInputKey: 'chatInput',
+            chatSessionKey: 'sessionId',
+            loadPreviousSession: true,
+            metadata: {},
+            showWelcomeScreen: false,
+            defaultLanguage: 'en',
+            initialMessages: [
+              'Hi how are you?👍 ',
+              'My name is john. How can I assist you today?'
+            ],
+            i18n: {
+              en: {
+                title: 'New Chat',
+                subtitle: "Start a chat. We're here to help you 24/7.",
+                footer: '',
+                getStarted: 'New Conversation',
+                inputPlaceholder: 'Type your question..',
+              },
+            },
+            enableStreaming: false,
+            theme: {
+              primary: '#0078d4',
+              background: '#0b0b0b',
+              chatBackground: '#1a1a1a',
+              botMessageBackground: '#2d2d2d',
+              userMessageBackground: '#0078d4',
+              text: '#ffffff'
+              
+            }
           });
         </script>
       </body>
