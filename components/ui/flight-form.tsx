@@ -1,14 +1,15 @@
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { getAirlineByName } from "../../utils/api";
+import { TabTitle } from "../TabTitle";
 
 interface FlightData {
   airline_code: string;
@@ -24,7 +25,10 @@ interface FlightFormProps {
   selectedAirline?: string;
 }
 
-export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProps) {
+export default function FlightForm({
+  onSubmit,
+  selectedAirline,
+}: FlightFormProps) {
   const [form, setForm] = useState<FlightData>({
     airline_code: "",
     flight_number: "",
@@ -63,102 +67,165 @@ export default function FlightForm({ onSubmit, selectedAirline }: FlightFormProp
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const serviceClasses = ["Economy", "Business", "First"];
-  const airports = ["CDG", "LHR", "FRA", "ZRH", "DXB", "SIN", "MEX", "JFK", "MAD"];
+  const serviceClasses = [
+    "Select service class",
+    "Economy",
+    "Business",
+    "First",
+  ];
+  const airports = [
+    "CDG",
+    "LHR",
+    "FRA",
+    "ZRH",
+    "DXB",
+    "SIN",
+    "MEX",
+    "JFK",
+    "MAD",
+  ];
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>✈️ Flight Details</Text>
+    <View style={styles.layout}>
+      <main style={styles.container}>
+        <TabTitle
+          title={`${selectedAirline}`}
+          subtitle="Fill flight information"
+        />
 
-      {loading && <ActivityIndicator color="#0078d4" style={{ marginBottom: 10 }} />}
-      {error && <Text style={styles.error}>{error}</Text>}
+        {loading && (
+          <ActivityIndicator color="#0078d4" style={{ marginBottom: 10 }} />
+        )}
 
-      <TextInput
-        placeholder="AIRLINE CODE"
-        value={form.airline_code}
-        editable={false}
-        style={[styles.input, { backgroundColor: "#f3f2f1" }]}
-      />
-
-      <TextInput
-        placeholder="FLIGHT NUMBER"
-        value={form.flight_number}
-        onChangeText={(v) => handleChange("flight_number", v)}
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Service Class</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={form.service_class}
-          onValueChange={(v) => handleChange("service_class", v)}
+        <ul
+          style={{
+            listStyleType: "none",
+            padding: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "stretch",
+            gap: 10,
+            width: "100%",
+          }}
         >
-          {serviceClasses.map((opt) => (
-            <Picker.Item key={opt} label={opt} value={opt} />
-          ))}
-        </Picker>
-      </View>
+          <li>
+            <TextInput
+              placeholder="Airline code"
+              value={form.airline_code}
+              editable={false}
+              style={[styles.input]}
+            />
+          </li>
 
-      <Text style={styles.label}>Origin</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={form.origin}
-          onValueChange={(v) => handleChange("origin", v)}
+          <li>
+            <TextInput
+              placeholder="Flight number"
+              value={form.flight_number}
+              onChangeText={(v) => handleChange("flight_number", v)}
+              style={styles.input}
+            />
+          </li>
+
+          <li>
+            <View>
+              <Picker
+                selectedValue={form.service_class}
+                onValueChange={(v) => handleChange("service_class", v)}
+                style={styles.picker}
+              >
+                {serviceClasses.map((opt) => (
+                  <Picker.Item key={opt} label={opt} value={opt} />
+                ))}
+              </Picker>
+            </View>
+          </li>
+
+          <li>
+            <Text style={styles.label}>Origin</Text>
+            <View>
+              <Picker
+                selectedValue={form.origin}
+                onValueChange={(v) => handleChange("origin", v)}
+                style={styles.picker}
+              >
+                {airports.map((opt) => (
+                  <Picker.Item key={opt} label={opt} value={opt} />
+                ))}
+              </Picker>
+            </View>
+          </li>
+
+          <li>
+            <Text style={styles.label}>Destination</Text>
+            <View>
+              <Picker
+                selectedValue={form.destination}
+                onValueChange={(v) => handleChange("destination", v)}
+                style={styles.picker}
+              >
+                {airports.map((opt) => (
+                  <Picker.Item key={opt} label={opt} value={opt} />
+                ))}
+              </Picker>
+            </View>
+          </li>
+
+          <li>
+            <TextInput
+              placeholder="FLIGHT DATE (YYYY-MM-DD)"
+              value={form.flight_date}
+              onChangeText={(v) => handleChange("flight_date", v)}
+              style={styles.input}
+            />
+          </li>
+        </ul>
+
+        <TouchableOpacity
+          disabled={!form.flight_number}
+          onPress={() => onSubmit(form)}
         >
-          {airports.map((opt) => (
-            <Picker.Item key={opt} label={opt} value={opt} />
-          ))}
-        </Picker>
-      </View>
-
-      <Text style={styles.label}>Destination</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={form.destination}
-          onValueChange={(v) => handleChange("destination", v)}
-        >
-          {airports.map((opt) => (
-            <Picker.Item key={opt} label={opt} value={opt} />
-          ))}
-        </Picker>
-      </View>
-
-      <TextInput
-        placeholder="FLIGHT DATE (YYYY-MM-DD)"
-        value={form.flight_date}
-        onChangeText={(v) => handleChange("flight_date", v)}
-        style={styles.input}
-      />
-
-      <TouchableOpacity
-        style={[styles.btn, !form.flight_number && styles.disabledBtn]}
-        disabled={!form.flight_number}
-        onPress={() => onSubmit(form)}
-      >
-        <Text style={styles.btnText}>Continue</Text>
-      </TouchableOpacity>
+          <Text style={styles.btnText}>Continue</Text>
+        </TouchableOpacity>
+        {error && <Text style={styles.error}>{error}</Text>}
+      </main>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { width: "90%", marginTop: 20 },
-  title: { fontSize: 18, fontWeight: "600", marginBottom: 10, color: "#201f1e" },
-  label: { fontWeight: "500", marginBottom: 4, color: "#201f1e" },
-  input: {
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 8,
-    backgroundColor: "#fff",
+  layout: {
+    paddingLeft: 20,
+    paddingRight: 20,
+    width: "100%",
   },
-  pickerContainer: {
-    borderColor: "#ccc",
+  container: {
+    marginTop: 50,
+    display: "flex",
+    flexDirection: "column",
+    gap: 20,
+  },
+  label: { fontWeight: "500", marginBottom: 4, color: "#201f1e" },
+
+  input: {
+    borderColor: "#6E7577",
+    color: "#6E7577",
     borderWidth: 1,
-    borderRadius: 6,
-    marginBottom: 8,
-    backgroundColor: "#fff",
+    fontSize: 16,
+    borderRadius: 10,
+    padding: 10,
+    textAlign: "center",
+    width: "100%",
+  },
+  picker: {
+    borderColor: "#6E7577",
+    color: "#6E7577",
+    fontSize: 16,
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    textAlign: "center",
+    width: "100%",
+    backgroundColor: "transparent",
   },
   btn: {
     backgroundColor: "#0078d4",
@@ -167,7 +234,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  btnText: { color: "#fff", textAlign: "center", fontWeight: "600" },
   disabledBtn: { backgroundColor: "#a6a6a6" },
   error: { color: "#a4262c", fontSize: 13, marginBottom: 8 },
+  btnText: {
+    backgroundColor: "#00132C",
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    padding: 15,
+    borderRadius: 10,
+    textAlign: "center",
+  },
 });

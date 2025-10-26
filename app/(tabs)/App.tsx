@@ -1,9 +1,9 @@
+import { TabTitle } from "@/components/TabTitle";
 import React, { useMemo, useState } from "react";
 import {
   Image,
   Platform,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,9 +15,11 @@ import InspectionFlow from "../../components/screens/inspection-flow"; // ✅ co
 
 // URL de tu webhook n8n por plataforma
 const N8N_WEBHOOK = Platform.select({
-  android: "http://10.0.2.2:5678/webhook/3a2153a3-c897-4171-bf40-7ed4a255a30b/chat", // emulador Android
-  ios: "http://localhost:5678/webhook/3a2153a3-c897-4171-bf40-7ed4a255a30b/chat",     // simulador iOS
-  default: "http://localhost:5678/webhook/3a2153a3-c897-4171-bf40-7ed4a255a30b/chat",  // web/escritorio
+  android:
+    "http://10.0.2.2:5678/webhook/3a2153a3-c897-4171-bf40-7ed4a255a30b/chat", // emulador Android
+  ios: "http://localhost:5678/webhook/3a2153a3-c897-4171-bf40-7ed4a255a30b/chat", // simulador iOS
+  default:
+    "http://localhost:5678/webhook/3a2153a3-c897-4171-bf40-7ed4a255a30b/chat", // web/escritorio
 });
 
 // 🔹 Pantalla de Chat (WebView nativo / iframe web)
@@ -43,7 +45,7 @@ function ChatScreen({ onBack }: { onBack: () => void }) {
       </head>
       <body>
         <div id="n8n-chat"></div>
-        
+
         <script type="module">
           import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
@@ -82,7 +84,6 @@ function ChatScreen({ onBack }: { onBack: () => void }) {
               botMessageBackground: '#2d2d2d',
               userMessageBackground: '#0078d4',
               text: '#ffffff'
-              
             }
           });
         </script>
@@ -92,11 +93,11 @@ function ChatScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0b0b0b" }}>
-      <View style={styles.chatHeader}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>← Volver</Text>
+      <View>
+        <TouchableOpacity onPress={onBack}>
+          <Text>← Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.chatTitle}>Chatbot</Text>
+        <Text>Chatbot</Text>
         <View style={{ width: 70 }} />
       </View>
 
@@ -105,7 +106,12 @@ function ChatScreen({ onBack }: { onBack: () => void }) {
         <div style={{ flex: 1, height: "calc(100% - 48px)" }}>
           {/* @ts-ignore: elemento DOM en RN Web */}
           <iframe
-            style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              display: "block",
+            }}
             srcDoc={html}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           />
@@ -146,15 +152,36 @@ export default function App() {
   const imgMap = useMemo(() => {
     const images = [
       { key: "Air France", src: require("../../assets/images/air-france.png") },
-      { key: "British Airways", src: require("../../assets/images/british-airways.png") },
-      { key: "Cathay Pacific", src: require("../../assets/images/cathay-pacific.png") },
+      {
+        key: "British Airways",
+        src: require("../../assets/images/british-airways.png"),
+      },
+      {
+        key: "Cathay Pacific",
+        src: require("../../assets/images/cathay-pacific.png"),
+      },
       { key: "Emirates", src: require("../../assets/images/emirates.png") },
-      { key: "Etihad Airways", src: require("../../assets/images/etihad-airways.png") },
+      {
+        key: "Etihad Airways",
+        src: require("../../assets/images/etihad-airways.png"),
+      },
       { key: "Lufthansa", src: require("../../assets/images/lufthansa.png") },
-      { key: "Qatar Airways", src: require("../../assets/images/qatar-airways.png") },
-      { key: "Singapore Airlines", src: require("../../assets/images/singapore-airlines.png") },
-      { key: "Swiss Intl Air Lines", src: require("../../assets/images/swiss-international.png") },
-      { key: "Turkish Airlines", src: require("../../assets/images/turkish-airlines.png") },
+      {
+        key: "Qatar Airways",
+        src: require("../../assets/images/qatar-airways.png"),
+      },
+      {
+        key: "Singapore Airlines",
+        src: require("../../assets/images/singapore-airlines.png"),
+      },
+      {
+        key: "Swiss Intl Air Lines",
+        src: require("../../assets/images/swiss-international.png"),
+      },
+      {
+        key: "Turkish Airlines",
+        src: require("../../assets/images/turkish-airlines.png"),
+      },
     ];
     return Object.fromEntries(images.map((i) => [i.key, i.src]));
   }, []);
@@ -179,109 +206,79 @@ export default function App() {
 
   // HOME
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.content}>
-          <Text style={styles.title}>✈️ Select Airline</Text>
+    <SafeAreaView style={styles.layout}>
+      <main style={styles.container}>
+        <TabTitle title="Select Airline" subtitle="To generate a report" />
 
-          <View style={styles.row}>
-            <SelectList
-              data={data}
-              save="value"
-              setSelected={(val: string) => setSelected(val)}
-              placeholder="Choose an airline"
-              searchPlaceholder="Search..."
-              boxStyles={styles.box}
-              dropdownStyles={styles.dropdown}
+        <div style={styles.imageContainer}>
+          <SelectList
+            data={data}
+            save="value"
+            setSelected={(val: string) => setSelected(val)}
+            placeholder="Press to select airline"
+            searchPlaceholder="Search..."
+          />
+
+          {selectedImg && (
+            <Image
+              source={selectedImg}
+              style={styles.airlineImage}
+              resizeMode="contain"
             />
+          )}
+        </div>
 
-            {selectedImg && (
-              <Image source={selectedImg} style={styles.logoInline} resizeMode="contain" />
-            )}
-          </View>
-
-          <Text style={styles.selectedText}>
-            Selected: {selected || "None"}
+        <TouchableOpacity
+          disabled={!selected}
+          onPress={() => setScreen("inspection")}
+        >
+          <Text style={styles.btnText}>
+            {selected ? "Start Inspection" : "Fisrt select an airline"}
           </Text>
+        </TouchableOpacity>
+      </main>
 
-          <TouchableOpacity
-            style={[styles.btn, !selected && styles.disabledBtn]}
-            disabled={!selected}
-            onPress={() => setScreen("inspection")}
-          >
-            <Text style={styles.btnText}>
-              {selected ? "Start Inspection" : "Select an Airline"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-      {/* 🔹 Botón flotante para abrir el Chat */}
-      <TouchableOpacity style={styles.fab} onPress={() => setScreen("chat")}>
-        <Text style={styles.fabText}>Chat</Text>
+      <TouchableOpacity style={styles.btnIa} onPress={() => setScreen("chat")}>
+        <Text style={styles.btnText}>Open IA Chat</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f3f2f1" },
-  scrollContainer: { flexGrow: 1, justifyContent: "center" },
-  content: { paddingHorizontal: 20, alignItems: "center" },
-  title: { fontSize: 22, fontWeight: "700", color: "#201f1e", marginBottom: 20 },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
+  layout: {
+    paddingLeft: 20,
+    paddingRight: 20,
     width: "100%",
   },
-  logoInline: { width: 90, height: 60 },
-  box: { borderRadius: 12, flex: 1 },
-  dropdown: { borderRadius: 12, marginTop: 8 },
-  selectedText: { marginTop: 20, fontSize: 16, color: "#201f1e" },
-  btn: {
-    backgroundColor: "#0078d4",
-    borderRadius: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    marginTop: 40,
+  container: {
+    marginTop: "40%",
+    display: "flex",
+    flexDirection: "column",
+    gap: 20,
   },
-  disabledBtn: { backgroundColor: "#a6a6a6" },
-  btnText: { color: "#fff", fontWeight: "600", fontSize: 16 },
-
-  // 🔹 Chat header
-  chatHeader: {
-    height: 48,
-    backgroundColor: "#0b0b0b",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
+  imageContainer: {
+    display: "flex",
+    flexDirection: "column",
   },
-  backBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: "#1f2937",
-    borderRadius: 8,
+  airlineImage: {
+    aspectRatio: 1,
+    height: "auto",
+    maxWidth: "50%",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
-  backBtnText: { color: "#fff", fontWeight: "600" },
-  chatTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
-
-  // 🔹 FAB
-  fab: {
-    position: "absolute",
-    bottom: 24,
+  btnText: {
+    backgroundColor: "#00132C",
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    padding: 15,
+    borderRadius: 10,
+    textAlign: "center",
+  },
+  btnIa: {
+    position: "fixed",
+    bottom: 20,
     right: 20,
-    backgroundColor: "#111827",
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
   },
-  fabText: { color: "#fff", fontWeight: "700" },
 });

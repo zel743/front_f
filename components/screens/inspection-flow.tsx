@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { registerBarcode } from "../../utils/api";
 import BarcodeScanner from "../ui/barcode-scanner";
@@ -132,8 +132,6 @@ export default function InspectionFlow({
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.airlineHeader}>Airline: {selectedAirline}</Text>
-
       {/* Step 1: Flight Form */}
       {step === "flight" && (
         <FlightForm
@@ -144,10 +142,10 @@ export default function InspectionFlow({
 
       {/* Step 2: Scan Bottle */}
       {step === "scan" && (
-        <View style={styles.section}>
-          <Text style={styles.header}>Scan Bottle</Text>
-          <BarcodeScanner onDetected={handleDetected} />
-        </View>
+        <BarcodeScanner
+          onDetected={handleDetected}
+          selectedAirline={selectedAirline}
+        />
       )}
 
       {/* Step 3: Product Preview */}
@@ -155,11 +153,19 @@ export default function InspectionFlow({
         <View style={styles.section}>
           <Text style={styles.title}>Product Preview</Text>
           <View style={styles.previewBox}>
-            <Text style={styles.previewText}>Barcode: {bottleData.barcode}</Text>
-            <Text style={styles.previewText}>Name: {bottleData.product_name}</Text>
+            <Text style={styles.previewText}>
+              Barcode: {bottleData.barcode}
+            </Text>
+            <Text style={styles.previewText}>
+              Name: {bottleData.product_name}
+            </Text>
             <Text style={styles.previewText}>Brand: {bottleData.brand}</Text>
-            <Text style={styles.previewText}>Category: {bottleData.category}</Text>
-            <Text style={styles.previewText}>Size: {bottleData.bottle_size}</Text>
+            <Text style={styles.previewText}>
+              Category: {bottleData.category}
+            </Text>
+            <Text style={styles.previewText}>
+              Size: {bottleData.bottle_size}
+            </Text>
           </View>
 
           <TouchableOpacity style={styles.btn} onPress={handlePreviewContinue}>
