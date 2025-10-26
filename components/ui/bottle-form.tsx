@@ -54,8 +54,8 @@ export default function BottleForm({
     <View>
       <TabTitle title={`${selectedAirline}`} subtitle="Bottle inspection" />
 
+      <View style={{marginTop:36}}>
       <Text style={styles.label}>Condition</Text>
-      <View>
         <Picker
           selectedValue={form.condition}
           onValueChange={(v) => handleChange("condition", v)}
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     backgroundColor: "#fff",
   },
-  btn: { backgroundColor: "#107c10", padding: 12, borderRadius: 4 },
+  btn: { backgroundColor: "#201F1E", marginTop: 24, padding: 12, borderRadius: 4 },
   btnText: { color: "#fff", textAlign: "center", fontWeight: "600" },
   picker: {
     borderColor: "#6E7577",

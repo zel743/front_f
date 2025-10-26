@@ -238,9 +238,12 @@ export default function App() {
         </TouchableOpacity>
       </main>
 
-      <TouchableOpacity style={styles.btnIa} onPress={() => setScreen("chat")}>
+      {/* <TouchableOpacity style={styles.btnIa} onPress={() => setScreen("chat")}>
         <Text style={styles.btnText}>Open IA Chat</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+      <Text style={{ fontSize: 16, color: "#201F1E", left: 0, right: 0, bottom: 15, fontWeight: "bold", textAlign: "center", marginTop: 18, position: "fixed", width: "100%" }}>
+      SmartPour, a GateGroup Solution 
+     </Text>
     </SafeAreaView>
   );
 }

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { registerBarcode } from "../../utils/api";
 import { TabTitle } from "../TabTitle";
@@ -31,13 +31,11 @@ export default function InspectionFlow({
   const [bottleData, setBottleData] = useState<any>(null);
   const [result, setResult] = useState<any>(null);
 
-  // ✈️ Step 1: Flight Info Submitted
   const handleFlightSubmit = (data: any) => {
     setFlightInfo(data);
     setStep("scan");
   };
 
-  // 🍾 Step 2: Barcode Detected
   const handleDetected = (barcodeInfo: any) => {
     if (!barcodeInfo || !barcodeInfo.barcode) {
       Alert.alert("Scan Failed", "No valid barcode detected. Try again.");
@@ -61,10 +59,8 @@ export default function InspectionFlow({
     }
   };
 
-  // 👁️ Step 3: Show Product Info Preview
   const handlePreviewContinue = () => setStep("qualitative");
 
-  // 🧾 Step 4: Submit Bottle Qualitative Data
   const handleBottleSubmit = async (qualitative: any) => {
     if (!bottleData?.barcode) {
       Alert.alert("Error", "Bottle data missing. Please scan again.");
@@ -107,7 +103,6 @@ export default function InspectionFlow({
     }
   };
 
-  // 🔁 Restart process
   const restart = () => {
     setStep("flight");
     setFlightInfo(null);
@@ -115,24 +110,23 @@ export default function InspectionFlow({
     setResult(null);
   };
 
-  // 🎨 Color helper for recommendation
   const getRecommendationColor = (action?: string) => {
     switch ((action || "").toLowerCase()) {
       case "keep":
-        return "#107C10"; // green
+        return "#107C10";
       case "refill":
-        return "#0078D4"; // blue
+        return "#0078D4";
       case "replace":
-        return "#FFB900"; // yellow
+        return "#FFB900";
       case "discard":
-        return "#A4262C"; // red
+        return "#A4262C";
       default:
-        return "#605E5C"; // neutral gray
+        return "#605E5C";
     }
   };
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       {/* Step 1: Flight Form */}
       {step === "flight" && (
         <FlightForm
@@ -149,33 +143,25 @@ export default function InspectionFlow({
         />
       )}
 
-      {/* Step 3: Product Preview */}
+      {/* Step 3: Bottle Preview */}
       {step === "preview" && bottleData && (
-        <div style={styles.container}>
-          <TabTitle title={`${selectedAirline}`} subtitle="Bottle preview" />
+        <View style={styles.formContainer}>
+          <TabTitle title={selectedAirline} subtitle="Bottle preview" />
           <View style={styles.previewBox}>
-            <Text style={styles.previewText}>
-              Barcode: {bottleData.barcode}
-            </Text>
-            <Text style={styles.previewText}>
-              Name: {bottleData.product_name}
-            </Text>
+            <Text style={styles.previewText}>Barcode: {bottleData.barcode}</Text>
+            <Text style={styles.previewText}>Name: {bottleData.product_name}</Text>
             <Text style={styles.previewText}>Brand: {bottleData.brand}</Text>
-            <Text style={styles.previewText}>
-              Category: {bottleData.category}
-            </Text>
-            <Text style={styles.previewText}>
-              Size: {bottleData.bottle_size}
-            </Text>
+            <Text style={styles.previewText}>Category: {bottleData.category}</Text>
+            <Text style={styles.previewText}>Size: {bottleData.bottle_size}</Text>
           </View>
 
-          <TouchableOpacity onPress={handlePreviewContinue}>
+          <TouchableOpacity style={styles.btnPrimary} onPress={handlePreviewContinue}>
             <Text style={styles.btnText}>Continue</Text>
           </TouchableOpacity>
-        </div>
+        </View>
       )}
 
-      {/* Step 4: Qualitative Data */}
+      {/* Step 4: Bottle Form */}
       {step === "qualitative" && (
         <BottleForm
           onSubmit={handleBottleSubmit}
@@ -183,16 +169,15 @@ export default function InspectionFlow({
         />
       )}
 
-      {/* Step 5: Final Report */}
+      {/* Step 5: Inspection Report */}
       {step === "done" && (
-        <View style={styles.resultContainer}>
-          <TabTitle title={`${selectedAirline}`} subtitle="Inspection Report" />
+        <View style={styles.formContainer}>
+          <TabTitle title={selectedAirline} subtitle="Inspection Report" />
 
           {loading ? (
-            <ActivityIndicator size="large" color="#0078d4" />
+            <ActivityIndicator size="large" color="#0078D4" />
           ) : result ? (
             <>
-              {/* Product Info */}
               <View style={styles.infoCard}>
                 <Text style={styles.infoTitle}>Product:</Text>
                 <Text style={styles.infoText}>
@@ -211,20 +196,13 @@ export default function InspectionFlow({
                 <Text style={styles.infoText}>{result.flight?.date}</Text>
               </View>
 
-              {/* Recommendation */}
               <View style={styles.recommendationContainer}>
-                <Text style={styles.recommendationLabel}>
-                  Recommended Action:
-                </Text>
+                <Text style={styles.recommendationLabel}>Recommended Action:</Text>
                 <View style={styles.recommendationRow}>
                   <View
                     style={[
                       styles.circle,
-                      {
-                        backgroundColor: getRecommendationColor(
-                          result.recommended_action
-                        ),
-                      },
+                      { backgroundColor: getRecommendationColor(result.recommended_action) },
                     ]}
                   />
                   <Text style={styles.recommendationText}>
@@ -233,11 +211,10 @@ export default function InspectionFlow({
                 </View>
               </View>
 
-              {/* Policy Info */}
               {result.policy_used && (
                 <View style={styles.policyBox}>
                   <Text style={styles.policyTitle}>
-                    🧭 Policy Applied: {result.policy_used}
+                    Policy Applied: {result.policy_used}
                   </Text>
                   <Text style={styles.policyNotes}>{result.notes}</Text>
                 </View>
@@ -247,11 +224,11 @@ export default function InspectionFlow({
             <Text style={styles.resultText}>No result data.</Text>
           )}
 
-          <TouchableOpacity onPress={restart}>
+          <TouchableOpacity style={styles.btnPrimary} onPress={restart}>
             <Text style={styles.btnText}>Scan Another Bottle</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onReturnHome}>
+          <TouchableOpacity style={styles.btnSecondary} onPress={onReturnHome}>
             <Text style={styles.btnText}>Finish & Return Home</Text>
           </TouchableOpacity>
         </View>
@@ -261,60 +238,65 @@ export default function InspectionFlow({
 }
 
 const styles = StyleSheet.create({
-  airlineHeader: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#0078d4",
-    marginBottom: 20,
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: "#fff",
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+    alignItems: "center",
   },
-  section: { width: "90%", alignItems: "center" },
-  header: { fontSize: 20, fontWeight: "600", marginBottom: 10 },
-  title: { fontSize: 18, fontWeight: "600", marginBottom: 10 },
+  formContainer: {
+    width: "100%",
+    maxWidth: 400,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 40,
+  },
   previewBox: {
     width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#DADADA",
+    padding: 16,
+    marginBottom: 24,
+    marginTop: 36,
   },
-  previewText: { fontSize: 15, marginBottom: 4, color: "#201f1e" },
-  resultContainer: { width: "90%", alignItems: "center", marginTop: 20 },
-  resultText: {
-    backgroundColor: "#f3f2f1",
-    padding: 10,
-    borderRadius: 6,
-    fontSize: 14,
-    color: "#201f1e",
-    width: "100%",
+  previewText: {
+    fontSize: 15,
+    marginBottom: 6,
+    color: "#201F1E",
   },
   infoCard: {
-    backgroundColor: "#f3f2f1",
-    borderRadius: 6,
-    padding: 10,
     width: "100%",
-    marginBottom: 16,
+    backgroundColor: "#F3F2F1",
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 20,
+    marginTop: 24,
   },
-  infoTitle: { fontWeight: "600", color: "#201f1e" },
-  infoText: { marginBottom: 4, color: "#323130" },
+  infoTitle: { fontWeight: "600", color: "#201F1E", marginBottom: 2 },
+  infoText: { color: "#323130", marginBottom: 4 },
   recommendationContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
   recommendationLabel: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#201f1e",
+    color: "#201F1E",
     marginBottom: 8,
   },
   recommendationRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
   },
   recommendationText: {
     fontSize: 18,
     fontWeight: "700",
     textTransform: "uppercase",
+    color: "#201F1E",
   },
   circle: {
     width: 50,
@@ -324,37 +306,45 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   policyBox: {
-    backgroundColor: "#e5f1fb",
-    borderRadius: 6,
-    padding: 10,
+    backgroundColor: "#E5F1FB",
+    borderRadius: 8,
+    padding: 12,
     width: "100%",
-    marginBottom: 10,
+    marginBottom: 16,
   },
   policyTitle: {
     fontWeight: "600",
     color: "#004578",
     marginBottom: 4,
   },
-  policyNotes: { color: "#201f1e", fontSize: 14 },
-  btn: {
-    backgroundColor: "#0078d4",
+  policyNotes: { color: "#201F1E", fontSize: 14 },
+  resultText: {
+    backgroundColor: "#F3F2F1",
     padding: 12,
-    borderRadius: 4,
-    marginTop: 20,
-    width: 220,
-    alignItems: "center",
-  },
-  btnText: { color: "#fff", fontWeight: "600" },
-
-  layout: {
-    paddingLeft: 20,
-    paddingRight: 20,
+    borderRadius: 6,
+    fontSize: 14,
+    color: "#201F1E",
     width: "100%",
   },
-  container: {
-    marginTop: "40%",
-    display: "flex",
-    flexDirection: "column",
-    gap: 20,
+  btnPrimary: {
+    backgroundColor: "#00091E",
+    paddingVertical: 14,
+    borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 16,
+  },
+  btnSecondary: {
+    backgroundColor: "#A4262C",
+    paddingVertical: 14,
+    borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  btnText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
